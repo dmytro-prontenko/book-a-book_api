@@ -1,18 +1,19 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { ValidationPipe } from '@nestjs/common';
+import { Logger } from '@nestjs/common';
+import { AllExceptionsFilter } from './filters/http-exception.filter';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const logger = new Logger('Application');
 
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true, // Видаляє поля, які не визначені у DTO
-      forbidNonWhitelisted: true, // Забороняє запити з полями, не визначеними у DTO
-      transform: true, // Автоматично трансформує прості типи
-    }),
-  );
+  const app = await NestFactory.create(AppModule, {
+    logger: ['error', 'warn', 'log', 'debug', 'verbose'],
+  });
 
-  await app.listen(process.env.PORT ?? 8000);
+  // Глобальний перехоплювач помилок
+  app.useGlobalFilters(new AllExceptionsFilter());
+
+  await app.listen(8000);
+  logger.log(`Application started on port 8000`);
 }
 bootstrap();
