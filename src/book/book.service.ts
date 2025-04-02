@@ -65,51 +65,51 @@ export class BookService {
   }
 
   async update(id: number, updateBookDto: UpdateBookDto) {
-    // this.logger.log(`Оновлення книги з ID ${id}`);
-    // try {
-    //   // Перевіряємо, чи існує книга
-    //   await this.findOne(id); // Це викине NotFoundException, якщо книги не існує
-    //
-    //   // Якщо ми дійшли сюди, книга існує, тож оновлюємо її
-    //   const updatedBook = await this.prisma.bookBase.update({
-    //     where: { id },
-    //     data: updateBookDto,
-    //   });
-    //
-    //   this.logger.debug(`Оновлено книгу з ID ${id}`);
-    //   return updatedBook;
-    // } catch (error) {
-    //   if (!(error instanceof NotFoundException)) {
-    //     this.logger.error(
-    //       `Помилка оновлення книги ${id}: ${error.message}`,
-    //       error.stack,
-    //     );
-    //   }
-    //   throw error;
-    // }
+    this.logger.log(`Оновлення книги з ID ${id}`);
+    try {
+      // Перевіряємо, чи існує книга
+      await this.findOne(id); // Це викине NotFoundException, якщо книги не існує
+
+      // Якщо ми дійшли сюди, книга існує, тож оновлюємо її
+      const updatedBook = await this.prisma.bookBase.update({
+        where: { id },
+        data: updateBookDto,
+      });
+
+      this.logger.debug(`Оновлено книгу з ID ${id}`);
+      return updatedBook;
+    } catch (error) {
+      if (!(error instanceof NotFoundException)) {
+        this.logger.error(
+          `Помилка оновлення книги ${id}: ${error.message}`,
+          error.stack,
+        );
+      }
+      throw error;
+    }
   }
 
   async remove(id: number) {
-    //   this.logger.log(`Видалення книги з ID ${id}`);
-    //   try {
-    //     // Перевіряємо, чи існує книга
-    //     await this.findOne(id); // Це викине NotFoundException, якщо книги не існує
-    //
-    //     // Якщо ми дійшли сюди, книга існує, тож видаляємо її
-    //     const deletedBook = await this.prisma.bookBase.delete({
-    //       where: { id },
-    //     });
-    //
-    //     this.logger.debug(`Видалено книгу з ID ${id}`);
-    //     return deletedBook;
-    //   } catch (error) {
-    //     if (!(error instanceof NotFoundException)) {
-    //       this.logger.error(
-    //         `Помилка видалення книги ${id}: ${error.message}`,
-    //         error.stack,
-    //       );
-    //     }
-    //     throw error;
-    //   }
+    this.logger.log(`Видалення книги з ID ${id}`);
+    try {
+      // Перевіряємо, чи існує книга
+      await this.findOne(id); // Це викине NotFoundException, якщо книги не існує
+
+      // Якщо ми дійшли сюди, книга існує, тож видаляємо її
+      const deletedBook = await this.prisma.bookBase.delete({
+        where: { id },
+      });
+
+      this.logger.debug(`Видалено книгу з ID ${id}`);
+      return deletedBook;
+    } catch (error) {
+      if (!(error instanceof NotFoundException)) {
+        this.logger.error(
+          `Помилка видалення книги ${id}: ${error.message}`,
+          error.stack,
+        );
+      }
+      throw error;
+    }
   }
 }
