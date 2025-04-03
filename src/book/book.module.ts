@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
-import { BookService } from './book.service';
-import { BookController } from './book.controller';
-import { PrismaService } from '../prisma.service';
+import { BookService } from '@app/book/book.service';
+import { BookController } from '@app/book/book.controller';
+import { PrismaService } from '@app/prisma.service';
 
 @Module({
   controllers: [BookController],

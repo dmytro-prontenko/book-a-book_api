@@ -14,7 +14,7 @@ enum BookStatus {
   OVERDUE     @map("overdue")
 }
 
-model BookBase {
+model Book {
   id             Int        @id @default(autoincrement())
   title          String
   author         String
@@ -26,5 +26,5 @@ model BookBase {
   status         BookStatus @default(AVAILABLE)
   average_rating Float      @default(0)
   created_at     DateTime   @default(now())
-  updated_at     DateTime   @default(now())
+  updated_at     DateTime   @updatedAt
 }
