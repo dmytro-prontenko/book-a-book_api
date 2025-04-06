@@ -23,7 +23,7 @@ export class CreateBookDto {
     message: '[author] - Мінімальна довжина для автора 3 символи',
   })
   @MaxLength(100, {
-    message: '[author] - Максимальна довжина для назви 100 символів',
+    message: '[author] - Максимальна довжина для автора 100 символів',
   })
   author: string;
 

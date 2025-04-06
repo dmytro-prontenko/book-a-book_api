@@ -22,7 +22,13 @@ export class BookController {
   @Get()
   async findAll(): Promise<IAllBookResponse> {
     const response = await this.bookService.findAll();
-    return { total_books: response.length, books: response };
+    return {
+      total_books: response.length,
+      total_pages: null,
+      current_page: null,
+      per_page: null,
+      books: response,
+    };
   }
 
   @Post()
