@@ -12,21 +12,22 @@ import { BookService } from '@app/book/book.service';
 import { CreateBookDto } from '@app/book/dto/create-book.dto';
 import { UpdateBookDto } from '@app/book/dto/update-book.dto';
 import { DeleteBooksDto } from '@app/book/dto/delete-book.dto';
+import { IAllBookResponse } from './interfaces/book.interface';
 
 @Controller('books')
 export class BookController {
   private readonly logger = new Logger(BookController.name);
   constructor(private readonly bookService: BookService) {}
 
+  @Get()
+  async findAll(): Promise<IAllBookResponse> {
+    const response = await this.bookService.findAll();
+    return { total_books: response.length, books: response };
+  }
+
   @Post()
   create(@Body() createBookDto: CreateBookDto) {
     return this.bookService.create(createBookDto);
-  }
-
-  @Get()
-  async findAll() {
-    this.logger.log('Request to get all book');
-    return await this.bookService.findAll();
   }
 
   @Get('book/:id')

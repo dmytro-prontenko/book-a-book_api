@@ -15,6 +15,7 @@ async function bootstrap() {
     logger: ['error', 'warn', 'log', 'debug', 'verbose'],
   });
 
+  app.setGlobalPrefix('api');
   // Глобальний перехоплювач помилок
   app.useGlobalFilters(new AllExceptionsFilter());
 

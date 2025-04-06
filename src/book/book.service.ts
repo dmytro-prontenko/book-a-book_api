@@ -1,20 +1,29 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { CreateBookDto } from '@app/book/dto/create-book.dto';
-import { PrismaService } from '@app/prisma.service';
+
 import { UpdateBookDto } from '@app/book/dto/update-book.dto';
+import { BookEntity } from '@app/book/entities/book.entity';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class BookService {
   private readonly logger = new Logger(BookService.name);
 
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    @InjectRepository(BookEntity)
+    private readonly bookRepository: Repository<BookEntity>,
+  ) {}
 
-  async create(dto: CreateBookDto) {
+  async create(dto: CreateBookDto): Promise<BookEntity> {
     this.logger.log('Створення нової книги');
     try {
-      const book = await this.prisma.book.create({ data: dto });
-      this.logger.debug(`Створено книгу з ID ${book.id}`);
-      return book;
+      const book = this.bookRepository.create(dto);
+
+      const savedBook = await this.bookRepository.save(book);
+
+      this.logger.debug(`Створено книгу з ID ${savedBook.id}`);
+      return savedBook;
     } catch (error) {
       this.logger.error(
         `Помилка створення книги: ${error.message}`,
@@ -24,10 +33,14 @@ export class BookService {
     }
   }
 
-  async findAll() {
+  async findAll(): Promise<BookEntity[]> {
     this.logger.log('Отримання всіх книг');
     try {
-      const books = await this.prisma.book.findMany();
+      const books = await this.bookRepository.find({
+        order: {
+          id: 'DESC',
+        },
+      });
       this.logger.debug(`Знайдено ${books.length} книг`);
       return books;
     } catch (error) {
@@ -39,12 +52,10 @@ export class BookService {
     }
   }
 
-  async findOne(id: number) {
+  async findOne(id: number): Promise<BookEntity> {
     this.logger.log(`Отримання книги з ID ${id}`);
     try {
-      const book = await this.prisma.book.findUnique({
-        where: { id },
-      });
+      const book = await this.bookRepository.findOne({ where: { id } });
 
       if (!book) {
         this.logger.warn(`Книгу з ID ${id} не знайдено`);
@@ -64,17 +75,27 @@ export class BookService {
     }
   }
 
-  async update(id: number, updateBookDto: UpdateBookDto) {
+  async update(id: number, dto: UpdateBookDto): Promise<BookEntity> {
     this.logger.log(`Оновлення книги з ID ${id}`);
     try {
       // Перевіряємо, чи існує книга
-      await this.findOne(id); // Це викине NotFoundException, якщо книги не існує
+      const existingBook = await this.bookRepository.findOne({ where: { id } });
 
-      // Якщо ми дійшли сюди, книга існує, тож оновлюємо її
-      const updatedBook = await this.prisma.book.update({
-        where: { id },
-        data: updateBookDto,
-      });
+      if (!existingBook) {
+        throw new NotFoundException(`Книгу з ID ${id} не знайдено`);
+      }
+
+      // Оновлюємо книгу
+      await this.bookRepository.update(id, dto);
+
+      // Отримуємо оновлену книгу
+      const updatedBook = await this.bookRepository.findOne({ where: { id } });
+
+      if (!updatedBook) {
+        throw new NotFoundException(
+          `Книгу з ID ${id} не знайдено після оновлення`,
+        );
+      }
 
       this.logger.debug(`Оновлено книгу з ID ${id}`);
       return updatedBook;
@@ -89,30 +110,31 @@ export class BookService {
     }
   }
 
-  async remove(ids: number[]) {
-    const result: any = [];
-    for (const id of ids) {
-      try {
-        // Перевіряємо, чи існує книга
-        await this.findOne(id); // Це викине NotFoundException, якщо книги не існує
+  async remove(ids: number[]): Promise<BookEntity[]> {
+    this.logger.log(`Видалення книг з ID: ${ids.join(', ')}`);
+    try {
+      const result: BookEntity[] = [];
 
-        // Якщо ми дійшли сюди, книга існує, тож видаляємо її
-        const deletedBook = await this.prisma.book.delete({
-          where: { id },
-        });
+      for (const id of ids) {
+        // Перевіряємо, чи існує книга
+        const book = await this.findOne(id); // Це викине NotFoundException, якщо книги не існує
+
+        // Видаляємо книгу
+        await this.bookRepository.remove(book);
 
         this.logger.debug(`Видалено книгу з ID ${id}`);
-        result.push(deletedBook);
-      } catch (error) {
-        if (!(error instanceof NotFoundException)) {
-          this.logger.error(
-            `Помилка видалення книги ${id}: ${error.message}`,
-            error.stack,
-          );
-        }
-        throw error;
+        result.push(book);
       }
+
+      return result;
+    } catch (error) {
+      if (!(error instanceof NotFoundException)) {
+        this.logger.error(
+          `Помилка видалення книг: ${error.message}`,
+          error.stack,
+        );
+      }
+      throw error;
     }
-    return result;
   }
 }
