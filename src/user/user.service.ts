@@ -3,8 +3,9 @@ import { CreateUserDto } from '@app/user/dto/create-user.dto';
 import { UpdateUserDto } from '@app/user/dto/update-user.dto';
 import { UserEntity } from '@app/user/entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { BookEntity } from '@app/book/entities/book.entity';
 import { Repository } from 'typeorm';
+import { sign } from 'jsonwebtoken';
+import { JWT_SECRET } from '@app/config';
 
 @Injectable()
 export class UserService {
@@ -35,5 +36,36 @@ export class UserService {
 
   remove(id: number) {
     return `This action removes a #${id} user`;
+  }
+
+  generateJwt(user: UserEntity): string {
+    return sign(
+      {
+        id: user.id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        role: user.role,
+        isBlocked: user.isBlocked,
+        created_at: user.created_at,
+      },
+      JWT_SECRET,
+    );
+  }
+
+  buildUserResponse(user: UserEntity): any {
+    const { id, firstName, lastName, email, role, isBlocked } = user;
+    return {
+      message: 'User was successfully created!',
+      user: {
+        id,
+        firstName,
+        lastName,
+        email,
+        role,
+        isBlocked,
+        token: this.generateJwt(user),
+      },
+    };
   }
 }
