@@ -8,7 +8,9 @@ import {
 } from 'class-validator';
 
 export class CreateUserDto {
-  @IsString()
+  @IsString({
+    message: '[firstName] - Імʼя не має містити цифр або спеціальних символів',
+  })
   @IsNotEmpty({ message: '[firstName] - Імʼя не може бути порожнім' })
   @MinLength(3, {
     message: '[firstName] - Мінімальна довжина для імені 3 символи',

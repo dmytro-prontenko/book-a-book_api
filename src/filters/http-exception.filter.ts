@@ -22,22 +22,36 @@ export class AllExceptionsFilter implements ExceptionFilter {
         ? exception.getStatus()
         : HttpStatus.INTERNAL_SERVER_ERROR;
 
-    const message =
-      exception instanceof HttpException
-        ? exception.message
-        : 'Internal server error';
-
-    // Детальне логування помилки
-    this.logger.error(
-      `Status ${status} - ${message} - ${request.method} ${request.url}`,
-      exception.stack,
-    );
-
-    response.status(status).json({
+    // Отримання детальної відповіді з винятку
+    let responseBody: any = {
       statusCode: status,
       timestamp: new Date().toISOString(),
       path: request.url,
-      message,
-    });
+    };
+
+    if (exception instanceof HttpException) {
+      const exceptionResponse = exception.getResponse();
+
+      // Перевірка, чи є відповідь об'єктом з додатковими даними
+      if (typeof exceptionResponse === 'object') {
+        responseBody = {
+          ...responseBody,
+          ...exceptionResponse,
+        };
+      } else {
+        // Якщо відповідь - просто рядок
+        responseBody.message = exceptionResponse;
+      }
+    } else {
+      responseBody.message = 'Internal server error';
+    }
+
+    // Детальне логування помилки
+    this.logger.error(
+      `Status ${status} - ${request.method} ${request.url}`,
+      exception.stack,
+    );
+
+    response.status(status).json(responseBody);
   }
 }
