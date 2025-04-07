@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { CreateUserDto } from '@app/user/dto/create-user.dto';
 import { UpdateUserDto } from '@app/user/dto/update-user.dto';
 import { UserEntity } from '@app/user/entities/user.entity';
@@ -17,6 +17,14 @@ export class UserService {
   ) {}
 
   async createUser(createUserDto: CreateUserDto): Promise<UserEntity> {
+    const checkUserExists = await this.userRepository.findOne({
+      where: { email: createUserDto.email },
+    });
+    if (checkUserExists)
+      throw new HttpException(
+        'Користувач вже зареєстрований',
+        HttpStatus.UNPROCESSABLE_ENTITY,
+      );
     try {
       const newUser = new UserEntity();
 
