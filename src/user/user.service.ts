@@ -5,7 +5,7 @@ import { UserEntity } from '@app/user/entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { sign } from 'jsonwebtoken';
-import * as process from 'node:process';
+import { IUserResponse } from '@app/user/interfaces/userResponse.interface';
 
 @Injectable()
 export class UserService {
@@ -16,10 +16,25 @@ export class UserService {
     private readonly userRepository: Repository<UserEntity>,
   ) {}
 
-  createUser(createUserDto: CreateUserDto): Promise<UserEntity> {
-    const newUser = new UserEntity();
-    Object.assign(newUser, createUserDto);
-    return this.userRepository.save(newUser);
+  async createUser(createUserDto: CreateUserDto): Promise<UserEntity> {
+    try {
+      const newUser = new UserEntity();
+
+      // Видаляємо secretCode з об'єкту перед тим, як копіювати властивості
+      const { secretCode, ...userData } = createUserDto;
+
+      Object.assign(newUser, userData);
+
+      // Перевіряємо secretCode і встановлюємо роль librarian, якщо він відповідає константі
+      if (secretCode === process.env.ROLE_CODE) {
+        newUser.role = 'librarian';
+      }
+
+      return await this.userRepository.save(newUser);
+    } catch (error) {
+      this.logger.error(`Error creating user: ${error.message}`, error.stack);
+      throw error;
+    }
   }
 
   findAll() {
@@ -53,7 +68,7 @@ export class UserService {
     );
   }
 
-  buildUserResponse(user: UserEntity): any {
+  buildUserResponse(user: UserEntity): IUserResponse {
     const { id, firstName, lastName, email, role, isBlocked } = user;
     return {
       message: 'User was successfully created!',

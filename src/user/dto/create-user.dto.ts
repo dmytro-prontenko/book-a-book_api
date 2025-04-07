@@ -1,16 +1,13 @@
-import { IsNotEmpty, IsString, MaxLength, MinLength } from 'class-validator';
+import {
+  IsEmail,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  MaxLength,
+  MinLength,
+} from 'class-validator';
 
 export class CreateUserDto {
-  @IsString()
-  @IsNotEmpty({ message: '[author] - Автор не може бути порожнім' })
-  @MinLength(3, {
-    message: '[author] - Мінімальна довжина для автора 3 символи',
-  })
-  @MaxLength(100, {
-    message: '[author] - Максимальна довжина для назви 100 символів',
-  })
-  author: string;
-
   @IsString()
   @IsNotEmpty({ message: '[firstName] - Імʼя не може бути порожнім' })
   @MinLength(3, {
@@ -32,5 +29,18 @@ export class CreateUserDto {
   lastName: string;
 
   @IsString()
+  @IsEmail({}, { message: '[email] - Некоректний формат електронної пошти' })
+  @IsNotEmpty({ message: '[email] - Email не може бути порожнім' })
   email: string;
+
+  @IsString()
+  @IsNotEmpty({ message: '[password] - Пароль не може бути порожнім' })
+  @MinLength(6, {
+    message: '[password] - Мінімальна довжина для пароля 6 символів',
+  })
+  password: string;
+
+  @IsString()
+  @IsOptional()
+  secretCode?: string;
 }

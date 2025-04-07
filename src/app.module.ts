@@ -4,9 +4,17 @@ import { LoggerMiddleware } from '@app/middleware/logger.middleware';
 import orm_config from '@app/orm_config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from './user/user.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
-  imports: [TypeOrmModule.forRoot(orm_config), BookModule, UserModule],
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true, // Робить конфігурацію доступною в усіх модулях
+    }),
+    TypeOrmModule.forRoot(orm_config),
+    BookModule,
+    UserModule,
+  ],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

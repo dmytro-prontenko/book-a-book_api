@@ -12,7 +12,7 @@ import { BookService } from '@app/book/book.service';
 import { CreateBookDto } from '@app/book/dto/create-book.dto';
 import { UpdateBookDto } from '@app/book/dto/update-book.dto';
 import { DeleteBooksDto } from '@app/book/dto/delete-book.dto';
-import { IAllBookResponse } from './interfaces/book.interface';
+import { IAllBookResponse } from './interfaces/bookResponse.interface';
 
 @Controller('books')
 export class BookController {
