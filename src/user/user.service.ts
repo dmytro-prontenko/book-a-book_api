@@ -5,7 +5,7 @@ import { UserEntity } from '@app/user/entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { sign } from 'jsonwebtoken';
-import { JWT_SECRET } from '@app/config';
+import * as process from 'node:process';
 
 @Injectable()
 export class UserService {
@@ -49,7 +49,7 @@ export class UserService {
         isBlocked: user.isBlocked,
         created_at: user.created_at,
       },
-      JWT_SECRET,
+      process.env.JWT_SECRET,
     );
   }
 
